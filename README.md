@@ -1,8 +1,8 @@
 # SubscriptionGuard
 
-SubscriptionGuard ist eine lokale Desktop-aehnliche Web-App zur Verwaltung von Abonnements, wiederkehrenden Kosten, Kuendigungsfristen und Einsparpotenzialen.
+SubscriptionGuard ist eine Desktop-App fuer die Verwaltung von Abonnements, wiederkehrenden Kosten, Kuendigungsfristen und Einsparpotenzialen. Das Projekt basiert auf einem modularen Frontend und ist bereits fuer eine Windows-App mit Tauri vorbereitet.
 
-## Enthaltene Funktionen
+## Funktionen
 
 - Abos anlegen, bearbeiten, duplizieren und loeschen
 - Kategorien, Zahlungsmodelle und mehrere Waehrungen
@@ -10,76 +10,45 @@ SubscriptionGuard ist eine lokale Desktop-aehnliche Web-App zur Verwaltung von A
 - Erinnerungen fuer Zahlungen, Verlaengerungen und Kuendigungsfristen
 - Analyse von Nutzung, Nutzenbewertung und Sparpotenzial
 - Vergleich mehrerer Abos innerhalb einer Kategorie
-- Reflexionsbereich fuer Nutzen-vs.-Kosten
 - 12-Monats-Vorschau und Kostenvisualisierung
 - Monatsbudget mit Statusanzeige
 - CSV-Import und CSV-Export
 - JSON-Backup und Restore
 - Lokale Speicherung per `localStorage`
 
-## Architektur
+## Projektstruktur
 
-- [app.js]: kleiner Einstiegspunkt
-- [src/app-controller.js]: verbindet UI, Datenquelle und Aktionen
-- [src/ui.js]: komplette DOM- und Render-Schicht
-- [src/analysis.js]: Geschaeftslogik fuer Kosten, Warnungen und Einsparpotenziale
-- [src/services/api.js]: austauschbare Datenquelle, lokal heute, remote spaeter
-- [src/services/localRepository.js]: lokale Persistenz
-- [src/data/sampleSubscriptions.js]: Demo-Daten
-- [src/utils.js]: gemeinsame Hilfsfunktionen
+- `index.html`, `styles.css`, `app.js`: Einstieg ins Frontend
+- `src/app-controller.js`: verbindet UI, Datenquelle und Aktionen
+- `src/ui.js`: DOM-Logik und Rendering
+- `src/analysis.js`: Berechnungen, Warnungen und Insights
+- `src/services/api.js`: Schnittstelle fuer lokale oder spaetere Remote-Datenquelle
+- `src/services/localRepository.js`: aktuelle lokale Persistenz
+- `src-tauri/`: Tauri-Desktop-App
+- `scripts/`: Hilfsskripte fuer Dist, Dev-Start und Build
 
-## Starten
 
-Die App benoetigt kein Build-Tool.
+## Team-Workflow
 
-1. [index.html] im Browser oeffnen.
-2. Optional Demo-Daten laden.
-3. Abos verwalten und Analysen direkt lokal nutzen.
+Branches:
 
-## Desktop-Weiterentwicklung
+- `main`: stabiler gemeinsamer Stand
+- `frontend/desktop-ui`: UI, UX, Komponenten, Layout, Charts
+- `backend/api-foundation`: API, Controller, Server-Grundstruktur
+- `backend/database-schema`: Datenbankmodell, Migrationen, Persistence
+- `desktop/tauri-polish`: Desktop-spezifische Details wie Icon, Installer, Fensterverhalten
 
-Die Architektur ist jetzt so vorbereitet, dass spaeter zwei Wege moeglich sind:
+Empfehlung:
 
-- Desktop zuerst:
-  Frontend in Tauri oder Electron packen und die aktuelle lokale Datenquelle weiterverwenden.
-- Backend spaeter:
-  In [src/services/api.js] von `mode: "local"` auf eine echte Remote-Implementierung umstellen.
+- Nicht dauerhaft direkt auf `main` arbeiten
+- Pro Feature oder Aufgabenblock einen eigenen Branch nutzen
+- Danach Pull Request nach `main`
 
-## Tauri Windows App
+## Backend-Integration
 
-Die App ist jetzt auf Tauri vorbereitet:
+Das Backend sollte an `src/services/api.js` andocken. Dort ist die Datenquelle bereits so vorbereitet, dass spaeter von lokalem Speicher auf echte HTTP-Endpunkte umgestellt werden kann.
 
-- [src-tauri/Cargo.toml](c:\Users\toqql\Desktop\SE I\src-tauri\Cargo.toml)
-- [src-tauri/tauri.conf.json](c:\Users\toqql\Desktop\SE I\src-tauri\tauri.conf.json)
-- [src-tauri/src/main.rs](c:\Users\toqql\Desktop\SE I\src-tauri\src\main.rs)
-- [src-tauri/capabilities/default.json](c:\Users\toqql\Desktop\SE I\src-tauri\capabilities\default.json)
-- [scripts/prepare-dist.ps1](c:\Users\toqql\Desktop\SE I\scripts\prepare-dist.ps1)
-- [scripts/Run-TauriDev.ps1](c:\Users\toqql\Desktop\SE I\scripts\Run-TauriDev.ps1)
-- [scripts/Build-TauriApp.ps1](c:\Users\toqql\Desktop\SE I\scripts\Build-TauriApp.ps1)
-
-Der Dist-Schritt kopiert dein aktuelles Frontend in [dist](c:\Users\toqql\Desktop\SE I\dist), und Tauri verwendet genau diesen Ordner als Frontend-Basis.
-
-### Build auf Windows
-
-Voraussetzungen:
-
-1. Microsoft C++ Build Tools mit `Desktop development with C++`
-2. Rust mit MSVC-Toolchain
-3. WebView2 Runtime
-
-Danach:
-
-1. `powershell -ExecutionPolicy Bypass -File .\scripts\Run-TauriDev.ps1`
-2. `powershell -ExecutionPolicy Bypass -File .\scripts\Build-TauriApp.ps1`
-
-Das Build-Ergebnis liegt spaeter typischerweise unter:
-
-- `src-tauri\target\release\bundle\nsis\`
-- `src-tauri\target\release\bundle\msi\`
-
-## Spaetere Backend-Endpunkte
-
-Sinnvolle Endpunkte waeren zum Beispiel:
+Sinnvolle spaetere Endpunkte:
 
 - `GET /state`
 - `POST /state/import`
@@ -88,3 +57,15 @@ Sinnvolle Endpunkte waeren zum Beispiel:
 - `POST /subscriptions`
 - `PUT /subscriptions/:id`
 - `DELETE /subscriptions/:id`
+
+Wichtig:
+
+- UI und Backend moeglichst getrennt halten
+- Nicht direkt in `src/ui.js` mit API-Logik anfangen
+- Backend-Team sollte von `src/services/api.js` aus arbeiten
+
+## Hinweise
+
+- Generierte Ordner wie `dist`, `build` und `src-tauri/target` sind in `.gitignore`
+- Das aktuelle App-Icon ist technisch vorhanden, kann aber spaeter noch ersetzt werden
+- Nach Frontend-Aenderungen muss Tauri nicht neu eingerichtet werden, nur neu gebaut werden
