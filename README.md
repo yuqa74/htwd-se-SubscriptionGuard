@@ -19,20 +19,20 @@ SubscriptionGuard ist eine lokale Desktop-aehnliche Web-App zur Verwaltung von A
 
 ## Architektur
 
-- [app.js](c:\Users\toqql\Desktop\SE I\app.js): kleiner Einstiegspunkt
-- [src/app-controller.js](c:\Users\toqql\Desktop\SE I\src\app-controller.js): verbindet UI, Datenquelle und Aktionen
-- [src/ui.js](c:\Users\toqql\Desktop\SE I\src\ui.js): komplette DOM- und Render-Schicht
-- [src/analysis.js](c:\Users\toqql\Desktop\SE I\src\analysis.js): Geschaeftslogik fuer Kosten, Warnungen und Einsparpotenziale
-- [src/services/api.js](c:\Users\toqql\Desktop\SE I\src\services\api.js): austauschbare Datenquelle, lokal heute, remote spaeter
-- [src/services/localRepository.js](c:\Users\toqql\Desktop\SE I\src\services\localRepository.js): lokale Persistenz
-- [src/data/sampleSubscriptions.js](c:\Users\toqql\Desktop\SE I\src\data\sampleSubscriptions.js): Demo-Daten
-- [src/utils.js](c:\Users\toqql\Desktop\SE I\src\utils.js): gemeinsame Hilfsfunktionen
+- [app.js]: kleiner Einstiegspunkt
+- [src/app-controller.js]: verbindet UI, Datenquelle und Aktionen
+- [src/ui.js]: komplette DOM- und Render-Schicht
+- [src/analysis.js]: Geschaeftslogik fuer Kosten, Warnungen und Einsparpotenziale
+- [src/services/api.js]: austauschbare Datenquelle, lokal heute, remote spaeter
+- [src/services/localRepository.js]: lokale Persistenz
+- [src/data/sampleSubscriptions.js]: Demo-Daten
+- [src/utils.js]: gemeinsame Hilfsfunktionen
 
 ## Starten
 
 Die App benoetigt kein Build-Tool.
 
-1. [index.html](c:\Users\toqql\Desktop\SE I\index.html) im Browser oeffnen.
+1. [index.html] im Browser oeffnen.
 2. Optional Demo-Daten laden.
 3. Abos verwalten und Analysen direkt lokal nutzen.
 
@@ -43,7 +43,7 @@ Die Architektur ist jetzt so vorbereitet, dass spaeter zwei Wege moeglich sind:
 - Desktop zuerst:
   Frontend in Tauri oder Electron packen und die aktuelle lokale Datenquelle weiterverwenden.
 - Backend spaeter:
-  In [src/services/api.js](c:\Users\toqql\Desktop\SE I\src\services\api.js) von `mode: "local"` auf eine echte Remote-Implementierung umstellen.
+  In [src/services/api.js] von `mode: "local"` auf eine echte Remote-Implementierung umstellen.
 
 ## Tauri Windows App
 
