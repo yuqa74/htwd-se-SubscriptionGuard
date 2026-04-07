@@ -1,0 +1,40 @@
+{
+  "productName": "SubscriptionGuard",
+  "version": "0.1.0",
+  "identifier": "com.subscriptionguard.app",
+  "build": {
+    "beforeBuildCommand": "cmd /c src-tauri\\prepare-dist.cmd",
+    "beforeDevCommand": "cmd /c src-tauri\\prepare-dist.cmd",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "SubscriptionGuard",
+        "width": 1440,
+        "height": 960,
+        "minWidth": 1100,
+        "minHeight": 760,
+        "resizable": true,
+        "fullscreen": false,
+        "maximized": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "icon": [
+      "icons/icon.ico"
+    ],
+    "targets": ["nsis", "msi"],
+    "windows": {
+      "webviewInstallMode": {
+        "type": "embedBootstrapper"
+      }
+    }
+  }
+}

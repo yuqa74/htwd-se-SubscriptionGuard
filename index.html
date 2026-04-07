@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SubscriptionGuard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-mark">SG</div>
+                <div>
+                    <p class="eyebrow">Finanzklarheit</p>
+                    <h1>SubscriptionGuard</h1>
+                </div>
+            </div>
+
+            <nav class="side-nav" aria-label="Hauptnavigation">
+                <button class="nav-link active" data-target="dashboard">Dashboard</button>
+                <button class="nav-link" data-target="subscriptions">Abos</button>
+                <button class="nav-link" data-target="insights">Analyse</button>
+                <button class="nav-link" data-target="reminders">Erinnerungen</button>
+                <button class="nav-link" data-target="settings">Einstellungen</button>
+            </nav>
+
+            <section class="panel compact">
+                <p class="panel-label">Status</p>
+                <div class="mini-stack">
+                    <div>
+                        <strong id="sidebar-active-count">0</strong>
+                        <span>aktive Abos</span>
+                    </div>
+                    <div>
+                        <strong id="sidebar-budget-status">-</strong>
+                        <span>Budgetstatus</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel compact">
+                <p class="panel-label">Schnellaktionen</p>
+                <div class="quick-actions">
+                    <button id="seed-demo-data" class="secondary">Demo-Daten laden</button>
+                    <button id="export-json" class="ghost">Backup exportieren</button>
+                    <label class="file-label ghost">
+                        Backup importieren
+                        <input id="import-json" type="file" accept=".json,application/json">
+                    </label>
+                </div>
+            </section>
+        </aside>
+
+        <main class="main-content">
+            <header class="hero">
+                <div>
+                    <p class="eyebrow">Intelligente Abo- und Kostenkontrolle</p>
+                    <h2>Verwalte wiederkehrende Ausgaben, erkenne Einsparpotenziale und behalte Fristen im Blick.</h2>
+                </div>
+                <div class="hero-actions">
+                    <button id="jump-to-form" class="primary">Neues Abo anlegen</button>
+                    <button id="load-sample" class="secondary">Mit Beispielen starten</button>
+                </div>
+            </header>
+
+            <section id="dashboard" class="view active">
+                <div class="grid metrics-grid">
+                    <article class="metric-card">
+                        <p>Monatliche Kosten</p>
+                        <strong id="monthly-total">0,00 €</strong>
+                        <span id="monthly-budget-caption">Kein Budget gesetzt</span>
+                    </article>
+                    <article class="metric-card">
+                        <p>Jährliche Gesamtkosten</p>
+                        <strong id="yearly-total">0,00 €</strong>
+                        <span id="yearly-savings-caption">Keine Einsparung markiert</span>
+                    </article>
+                    <article class="metric-card">
+                        <p>Nächste Zahlung</p>
+                        <strong id="next-payment-metric">-</strong>
+                        <span id="next-payment-caption">Noch keine Zahlungen geplant</span>
+                    </article>
+                    <article class="metric-card accent">
+                        <p>Kritische Fristen</p>
+                        <strong id="deadline-metric">0</strong>
+                        <span id="deadline-caption">Alles ruhig</span>
+                    </article>
+                </div>
+
+                <div class="grid dashboard-main">
+                    <article class="panel chart-panel">
+                        <div class="panel-header">
+                            <div>
+                                <p class="panel-label">Kostenstruktur</p>
+                                <h3>Monatliche Kosten nach Kategorie</h3>
+                            </div>
+                        </div>
+                        <div id="category-chart" class="bar-chart empty-state"></div>
+                    </article>
+
+                    <article class="panel chart-panel">
+                        <div class="panel-header">
+                            <div>
+                                <p class="panel-label">12-Monats-Vorschau</p>
+                                <h3>Entwicklung deiner Abbuchungen</h3>
+                            </div>
+                        </div>
+                        <canvas id="timeline-chart" width="640" height="280" aria-label="Kostenentwicklung"></canvas>
+                    </article>
+                </div>
+
+                <div class="grid dashboard-secondary">
+                    <article class="panel">
+                        <div class="panel-header">
+                            <div>
+                                <p class="panel-label">Prioritäten</p>
+                                <h3>Kündigen oder prüfen</h3>
+                            </div>
+                        </div>
+                        <div id="savings-list" class="list-shell empty-state"></div>
+                    </article>
+
+                    <article class="panel">
+                        <div class="panel-header">
+                            <div>
+                                <p class="panel-label">Fristen</p>
+                                <h3>Bevorstehende Erinnerungen</h3>
+                            </div>
+                        </div>
+                        <div id="reminder-preview" class="list-shell empty-state"></div>
+                    </article>
+                </div>
+            </section>
+
+            <section id="subscriptions" class="view">
+                <div class="grid subscriptions-layout">
+                    <article class="panel">
+                        <div class="panel-header">
+                            <div>
+                                <p class="panel-label">Verwalten</p>
+                                <h3>Abo erfassen oder bearbeiten</h3>
+                            </div>
+                            <button id="reset-form" class="ghost">Formular leeren</button>
+                        </div>
+
+                        <form id="subscription-form" class="subscription-form">
+                            <input type="hidden" id="subscription-id">
+
+                            <label>
+                                Name
+                                <input id="name" name="name" type="text" maxlength="80" required>
+                            </label>
+
+                            <label>
+                                Kategorie
+                                <select id="category" name="category" required>
+                                    <option value="">Bitte wählen</option>
+                                    <option>Unterhaltung</option>
+                                    <option>Software</option>
+                                    <option>Fitness</option>
+                                    <option>Bildung</option>
+                                    <option>Musik</option>
+                                    <option>Cloud</option>
+                                    <option>Gaming</option>
+                                    <option>Gesundheit</option>
+                                    <option>Produktivität</option>
+                                    <option>Sonstiges</option>
+                                </select>
+                            </label>
+
+                            <div class="form-row">
+                                <label>
+                                    Preis
+                                    <input id="amount" name="amount" type="number" min="0" step="0.01" required>
+                                </label>
+
+                                <label>
+                                    Währung
+                                    <select id="currency" name="currency" required>
+                                        <option value="EUR">EUR</option>
+                                        <option value="USD">USD</option>
+                                        <option value="GBP">GBP</option>
+                                        <option value="CHF">CHF</option>
+                                    </select>
+                                </label>
+                            </div>
+
+                            <div class="form-row">
+                                <label>
+                                    Zahlungsmodell
+                                    <select id="cycle" name="cycle" required>
+                                        <option value="monthly">Monatlich</option>
+                                        <option value="yearly">Jährlich</option>
+                                        <option value="weekly">Wöchentlich</option>
+                                        <option value="quarterly">Quartalsweise</option>
+                                    </select>
+                                </label>
+
+                                <label>
+                                    Nächste Zahlung
+                                    <input id="nextPaymentDate" name="nextPaymentDate" type="date" required>
+                                </label>
+                            </div>
+
+                            <div class="form-row">
+                                <label>
+                                    Vertragsbeginn
+                                    <input id="startDate" name="startDate" type="date">
+                                </label>
+
+                                <label>
+                                    Vertragsende
+                                    <input id="endDate" name="endDate" type="date">
+                                </label>
+                            </div>
+
+                            <div class="form-row">
+                                <label>
+                                    Kündigungsfrist endet am
+                                    <input id="cancelDeadline" name="cancelDeadline" type="date">
+                                </label>
+
+                                <label>
+                                    Erinnerungstage vorher
+                                    <input id="reminderDaysBefore" name="reminderDaysBefore" type="number" min="0" max="90" value="7">
+                                </label>
+                            </div>
+
+                            <div class="form-row">
+                                <label>
+                                    Nutzung pro Monat
+                                    <input id="usageCount" name="usageCount" type="number" min="0" max="200" value="0">
+                                </label>
+
+                                <label>
+                                    Nutzenbewertung 1-10
+                                    <input id="valueScore" name="valueScore" type="number" min="1" max="10" value="5">
+                                </label>
+                            </div>
+
+                            <label>
+                                Notizen
+                                <textarea id="notes" name="notes" rows="4" maxlength="240"></textarea>
+                            </label>
+
+                            <div class="toggle-row">
+                                <label class="toggle">
+                                    <input id="autoRenew" name="autoRenew" type="checkbox" checked>
+                                    <span>Automatische Verlängerung</span>
+                                </label>
+
+                                <label class="toggle">
+                                    <input id="active" name="active" type="checkbox" checked>
+                                    <span>Aktiv</span>
+                                </label>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="primary">Abo speichern</button>
+                                <button type="button" id="duplicate-selected" class="secondary">Abo duplizieren</button>
+                            </div>
+                        </form>
+                    </article>
+
+                    <article class="panel">
+                        <div class="panel-header">
+                            <div>
+                                <p class="panel-label">Übersicht</p>
+                                <h3>Alle Abonnements</h3>
+                            </div>
+                        </div>
+
+                        <div class="toolbar">
+                            <input id="search-input" type="search" placeholder="Suche nach Name oder Notiz">
+                            <select id="filter-category">
+                                <option value="all">Alle Kategorien</option>
+                            </select>
+                            <select id="filter-status">
+                                <option value="active">Aktive</option>
+                                <option value="all">Alle</option>
+                                <option value="inactive">Inaktive</option>
+                            </select>
+                            <select id="sort-select">
+                                <option value="nextPaymentDate">Nächste Zahlung</option>
+                                <option value="amountDesc">Preis absteigend</option>
+                                <option value="amountAsc">Preis aufsteigend</option>
+                                <option value="name">Name A-Z</option>
+                                <option value="valueScore">Nutzenbewertung</option>
+                            </select>
+                        </div>
+
+                        <div id="subscription-list" class="subscription-list empty-state"></div>
+                    </article>
+                </div>
+            </section>
+
+            <section id="insights" class="view">
+                <div class="grid insights-grid">
+                    <article class="panel">
+                        <div class="panel-header">
+                            <div>
+                                <p class="panel-label">Vergleich</p>
+                                <h3>Kategorien im direkten Vergleich</h3>
+                            </div>
+                        </div>
+                        <div id="category-comparison" class="comparison-grid empty-state"></div>
+                    </article>
+
+                    <article class="panel">
+                        <div class="panel-header">
+                            <div>
+                                <p class="panel-label">Nutzen vs. Kosten</p>
+                                <h3>Reflexion für bessere Entscheidungen</h3>
+                            </div>
+                        </div>
+                        <div id="reflection-cards" class="reflection-grid empty-state"></div>
+                    </article>
+
+                    <article class="panel">
+                        <div class="panel-header">
+                            <div>
+                                <p class="panel-label">Statistiken</p>
+                                <h3>Langfristige Entwicklung</h3>
+                            </div>
+                        </div>
+                        <div id="stats-grid" class="stats-grid"></div>
+                    </article>
+
+                    <article class="panel">
+                        <div class="panel-header">
+                            <div>
+                                <p class="panel-label">Potenzial</p>
+                                <h3>Markierte Einsparmöglichkeiten</h3>
+                            </div>
+                        </div>
+                        <div id="insight-savings" class="list-shell empty-state"></div>
+                    </article>
+                </div>
+            </section>
+
+            <section id="reminders" class="view">
+                <div class="grid reminders-layout">
+                    <article class="panel">
+                        <div class="panel-header">
+                            <div>
+                                <p class="panel-label">Warnungen</p>
+                                <h3>Anstehende Fristen und Verlängerungen</h3>
+                            </div>
+                        </div>
+                        <div id="reminders-list" class="list-shell empty-state"></div>
+                    </article>
+
+                    <article class="panel">
+                        <div class="panel-header">
+                            <div>
+                                <p class="panel-label">Import / Export</p>
+                                <h3>Daten mitnehmen oder ergänzen</h3>
+                            </div>
+                        </div>
+
+                        <div class="import-export">
+                            <button id="export-csv" class="secondary">CSV exportieren</button>
+                            <label class="file-label secondary">
+                                CSV importieren
+                                <input id="import-csv" type="file" accept=".csv,text/csv">
+                            </label>
+                            <button id="clear-data" class="ghost danger">Alle Daten löschen</button>
+                        </div>
+
+                        <p class="helper-text">
+                            CSV-Spalten: `name,category,amount,currency,cycle,nextPaymentDate,startDate,endDate,cancelDeadline,reminderDaysBefore,usageCount,valueScore,autoRenew,active,notes`
+                        </p>
+
+                        <div id="import-log" class="import-log"></div>
+                    </article>
+                </div>
+            </section>
+
+            <section id="settings" class="view">
+                <div class="grid settings-layout">
+                    <article class="panel">
+                        <div class="panel-header">
+                            <div>
+                                <p class="panel-label">Budget</p>
+                                <h3>Ziele und Währungen</h3>
+                            </div>
+                        </div>
+
+                        <form id="settings-form" class="settings-form">
+                            <div class="form-row">
+                                <label>
+                                    Monatsbudget für Abos
+                                    <input id="monthlyBudget" name="monthlyBudget" type="number" min="0" step="0.01">
+                                </label>
+                                <label>
+                                    Standardwährung
+                                    <select id="baseCurrency" name="baseCurrency">
+                                        <option value="EUR">EUR</option>
+                                        <option value="USD">USD</option>
+                                        <option value="GBP">GBP</option>
+                                        <option value="CHF">CHF</option>
+                                    </select>
+                                </label>
+                            </div>
+
+                            <div class="form-row">
+                                <label>
+                                    EUR Faktor
+                                    <input id="rateEUR" name="rateEUR" type="number" min="0.0001" step="0.0001" value="1">
+                                </label>
+                                <label>
+                                    USD Faktor
+                                    <input id="rateUSD" name="rateUSD" type="number" min="0.0001" step="0.0001" value="0.93">
+                                </label>
+                            </div>
+
+                            <div class="form-row">
+                                <label>
+                                    GBP Faktor
+                                    <input id="rateGBP" name="rateGBP" type="number" min="0.0001" step="0.0001" value="1.16">
+                                </label>
+                                <label>
+                                    CHF Faktor
+                                    <input id="rateCHF" name="rateCHF" type="number" min="0.0001" step="0.0001" value="1.04">
+                                </label>
+                            </div>
+
+                            <button type="submit" class="primary">Einstellungen speichern</button>
+                        </form>
+                    </article>
+
+                    <article class="panel">
+                        <div class="panel-header">
+                            <div>
+                                <p class="panel-label">Hinweis</p>
+                                <h3>Wie die App denkt</h3>
+                            </div>
+                        </div>
+
+                        <div class="info-copy">
+                            <p>Alle Daten bleiben lokal im Browser gespeichert. Die App bewertet Einsparpotenziale anhand von Preis, Nutzungsfrequenz, Nutzenbewertung und Fristlage.</p>
+                            <p>Währungen werden über deine hinterlegten Umrechnungsfaktoren in eine Basiswährung übertragen. So sind Monats- und Jahreswerte direkt vergleichbar.</p>
+                            <p>Die Erinnerungsansicht zeigt sowohl nächste Abbuchungen als auch Kündigungsfristen, damit automatische Verlängerungen nicht unbemerkt durchrutschen.</p>
+                        </div>
+                    </article>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <template id="subscription-card-template">
+        <article class="subscription-card">
+            <div class="card-top">
+                <div>
+                    <h4></h4>
+                    <p class="card-meta"></p>
+                </div>
+                <span class="status-pill"></span>
+            </div>
+            <div class="card-body"></div>
+            <div class="card-actions">
+                <button class="ghost edit-btn">Bearbeiten</button>
+                <button class="ghost delete-btn danger">Löschen</button>
+            </div>
+        </article>
+    </template>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>

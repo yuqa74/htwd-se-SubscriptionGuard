@@ -1,0 +1,5 @@
+.runtime/
+dist/
+build/
+src-tauri/target/
+src-tauri/gen/
